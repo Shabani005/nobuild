@@ -1,5 +1,3 @@
-#define _POSIX_C_SOURCE 200809L
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,6 +7,9 @@ typedef struct{
   int arrsize;
   char** value;
 } nb_arr;
+
+
+ 
 
 void nb_init(nb_arr *newarr, int initial_capacity){
     newarr->value = (char**)malloc(sizeof(char*)* initial_capacity);
@@ -21,9 +22,23 @@ void nb_alloc(nb_arr* newarr, char* newval){
     newarr->capacity *=2;
     newarr->value = (char**)realloc(newarr->value, sizeof(char*) * newarr->capacity);
   } 
-    newarr->value[newarr->arrsize++] = strdup(newarr->value[newarr->arrsize]);
-    newarr->arrsize++;
+    newarr->value[newarr->arrsize++] = strdup(newval);
 }
 
+void nb_append_int(nb_arr* newarr, int myint){
+  char buf[32];
+  sprintf(buf, "%d", myint);
+  nb_alloc(newarr, buf);
+}
+
+
+void nb_cmd(nb_arr* newarr){
+  char* cmd = (char*)malloc(13123232323);
+  for (int i; i < newarr->arrsize; i++){
+    
+    strcat(cmd, strcat(newarr->value[i]," "));
+  }
+  system(cmd);
+}
 
 
