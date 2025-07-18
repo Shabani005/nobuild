@@ -17,9 +17,9 @@ void nb_alloc(nb_arr* newarr, char** newval){
   if (newarr->arrsize >= newarr->capacity){
     newarr->capacity *=2;
     newarr->value = newval;
-  } else {
+  } 
     newarr->value = newval;
-  }
+    newarr->arrsize++;
 }
 
 
