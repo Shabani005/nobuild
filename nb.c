@@ -1,15 +1,14 @@
 #include "nb.h"
-
-
+  
 int main(){
  
-  nb_arr myarr;
+  nb_arr cmd;
 
-  nb_init(&myarr, 100);
-  nb_alloc(&myarr, "echo");
-  nb_alloc(&myarr, "hello");
-  nb_alloc(&myarr, "world");
-  nb_cmd(&myarr);
+  nb_init(&cmd, 100);
+  nb_alloc(&cmd, "gcc");
+  nb_alloc(&cmd, "hello.c");
+  nb_alloc(&cmd, "-o test");
+  nb_cmd(&cmd);
   return 0;
 }
 

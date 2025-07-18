@@ -34,7 +34,7 @@ void nb_append_int(nb_arr* newarr, int myint){
 
 void nb_cmd(nb_arr* newarr){
   char* cmd = (char*)malloc(13123232323);
-  for (int i; i < newarr->arrsize; i++){
+  for (int i=0; i < newarr->arrsize; i++){
     
     strcat(cmd, strcat(newarr->value[i]," "));
   }
