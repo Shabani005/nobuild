@@ -27,7 +27,7 @@ void nb_init(nb_arr *newarr, int initial_capacity){
 
 
 // later increase cap by size of new sheiSSe
-void nb_append(nb_arr *newarr, char* newval){
+void nb_append(nb_arr *newarr, char *newval){
   if (newarr->value == NULL){
     newarr->capacity =16;
   if (newarr->capacity > 16 | newarr->arrsize > newarr->capacity) {
