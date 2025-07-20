@@ -7,6 +7,7 @@ int main(){
   nb_append(&cmd, "gcc");
   nb_append(&cmd, "hello.c");
   nb_append(&cmd, "-o myhello");
+  nb_append(&cmd, "-static");
   
   
 
