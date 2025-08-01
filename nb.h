@@ -1,3 +1,4 @@
+#include <cstdio>
 typedef struct{
   int capacity;
   int arrsize;
@@ -20,6 +21,16 @@ void nb_print_info(nb_arr *newarr);
 
 
 void nb_cmd(nb_arr *newarr);
+
+void rename("nobuild.c", "nobuild.old.c"){ // old name shouldnt be nobuild.c. it should be the name of the current file.
+  
+}
+
+
+bool needs_rebuild(){ // need to implement rename file first to .old or something like nob does
+  
+}
+
 
 #ifdef NB_IMPLEMENTATION // make sure to define this before using the header
 
