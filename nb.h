@@ -1,12 +1,31 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 typedef struct{
   int capacity;
   int arrsize;
   char** value;
 } nb_arr;
+
+void nb_init(nb_arr *newarr, int initial_capacity);
+
+void nb_append(nb_arr *newarr, char *newval);
+void nb_append_int(nb_arr *newarr, int myint);
+void nb_append_float(nb_arr *newarr, float myfloat);
+
+void nb_free(nb_arr *newarr);
+
+
+char* nb_strdup(const char* s); // make this void that uses realloc later.
+
+void nb_print(nb_arr *newarr);
+void nb_print_info(nb_arr *newarr);
+
+
+void nb_cmd(nb_arr *newarr);
+
+#ifdef NB_IMPLEMENTATION // make sure to define this before using the header
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 
  
@@ -108,4 +127,7 @@ void nb_com(nb_arr *newarr){
 void append_c_file(FILE *filepointer){
 
 }
+
+#endif //NB_IMPLEMENTATION
+
 
