@@ -1,9 +1,20 @@
-#include <cstdio>
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 typedef struct{
   int capacity;
   int arrsize;
   char** value;
 } nb_arr;
+
+
+ typedef struct{
+    FILE *filep;
+    size_t filesize;
+    int chars;
+    char *buf;
+  } nb_file;
 
 void nb_init(nb_arr *newarr, int initial_capacity);
 
@@ -22,14 +33,11 @@ void nb_print_info(nb_arr *newarr);
 
 void nb_cmd(nb_arr *newarr);
 
-void rename("nobuild.c", "nobuild.old.c"){ // old name shouldnt be nobuild.c. it should be the name of the current file.
-  
-}
+// void copy_file(char* old_file_name, char* new_file_name);
 
+void copy_file(char* old_file_name, char* new_file_name);
 
-bool needs_rebuild(){ // need to implement rename file first to .old or something like nob does
-  
-}
+bool needs_rebuild(); // need to implement rename file first to .old or something like nob does
 
 
 #ifdef NB_IMPLEMENTATION // make sure to define this before using the header
@@ -37,6 +45,7 @@ bool needs_rebuild(){ // need to implement rename file first to .old or somethin
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 
 
  
@@ -138,6 +147,27 @@ void nb_com(nb_arr *newarr){
 void append_c_file(FILE *filepointer){
 
 }
+
+void copy_file(char* old_file_name, char* new_file_name){ // old name shouldnt be nobuild.c. it should be the name of the current file.
+  nb_file old_file; 
+  nb_file new_file;
+
+  old_file.filep = fopen(old_file_name, "rb");
+  fseek(old_file.filep, 0, SEEK_END);
+  
+  old_file.filesize = ftell(old_file.filep);
+  old_file.buf = (char*)malloc(old_file.filesize);
+  fseek(old_file.filep, 0, SEEK_SET);
+  fread(old_file.buf, 1, old_file.filesize, old_file.filep);
+  fclose(old_file.filep);
+
+  new_file.filep = fopen(new_file_name, "wb");
+  fwrite(old_file.buf, 1, old_file.filesize, new_file.filep);
+  fclose(new_file.filep);
+}
+
+
+
 
 #endif //NB_IMPLEMENTATION
 
