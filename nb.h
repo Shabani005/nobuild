@@ -1,6 +1,11 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <stdbool.h>
+#include <string.h>
+
 
 typedef struct{
   int capacity;
@@ -35,10 +40,18 @@ void nb_cmd(nb_arr *newarr);
 
 // void copy_file(char* old_file_name, char* new_file_name);
 
-void copy_file(char* old_file_name, char* new_file_name);
+void nb_copy_file(char* old_file_name, char* new_file_name);
 
-bool needs_rebuild(); // need to implement rename file first to .old or something like nob does
+//bool needs_rebuild(); // need to implement rename file first to .old or something like nob does
 
+
+bool nb_did_file_change(char *filename);
+
+
+bool nb_does_file_exist(char *filename);
+
+
+void nb_rebuild(char filename[]);
 
 #ifdef NB_IMPLEMENTATION // make sure to define this before using the header
 
@@ -148,7 +161,7 @@ void append_c_file(FILE *filepointer){
 
 }
 
-void copy_file(char* old_file_name, char* new_file_name){ // old name shouldnt be nobuild.c. it should be the name of the current file.
+void nb_copy_file(char* old_file_name, char* new_file_name){ // old name shouldnt be nobuild.c. it should be the name of the current file.
   nb_file old_file; 
   nb_file new_file;
 
@@ -166,6 +179,73 @@ void copy_file(char* old_file_name, char* new_file_name){ // old name shouldnt b
   fclose(new_file.filep);
 }
 
+bool nb_did_file_change(char *filename){
+  struct stat file_old;
+  stat(filename, &file_old);
+  
+  struct stat file_new;
+  char buf[64];
+  sprintf(buf, "%s.new", filename);
+  stat(buf, &file_new);
+
+  if (file_old.st_mtim.tv_sec > file_new.st_mtim.tv_sec){
+    return true;
+  } else {
+    return false;
+  }
+}
+
+
+bool nb_does_file_exist(char *filename){
+  char buf[64];
+  sprintf(buf, "%s.new", filename);
+
+    if (access("test.c.new", F_OK) == 0){
+    return true;
+  }
+  return false;
+}
+
+void nb_rebuild(char filename[]){
+  
+  char new_file[128];
+  sprintf(new_file, "%s.new", filename); 
+
+  if (nb_does_file_exist(new_file)){
+    printf("%s does exist\n", new_file);
+    if (nb_did_file_change(filename)){
+      printf("file did change\n");
+      nb_copy_file(filename, new_file);
+
+      nb_arr cmd;
+      char fname[128];
+
+      nb_init(&cmd, sizeof(fname)*2); 
+      strncpy(fname, filename, sizeof(fname));
+      fname[sizeof(fname)-1] = '\0';
+      char *dot = strrchr(fname, '.');
+      if (dot != NULL) {
+        *dot = '\0';
+      }     
+      printf("fname is: %s\n", fname);  
+      
+      nb_append(&cmd, "gcc");
+      nb_append(&cmd, "-o");
+      nb_append(&cmd, fname);
+      nb_append(&cmd, filename);
+      nb_cmd(&cmd);
+
+      nb_print_info(&cmd);
+      printf("rebuilt\n");
+
+  } else {
+    printf("file did not change\n");
+    }
+  }else{
+    printf("created %s", filename);
+    nb_copy_file(filename, new_file);
+  }
+}
 
 
 
