@@ -195,7 +195,7 @@ bool nb_did_file_change(char *filename){
   sprintf(buf, "%s.new", filename);
   stat(buf, &file_new);
 
-  if (file_old.st_mtim.tv_sec > file_new.st_mtim.tv_sec){
+  if (file_old.st_mtim.tv_nsec > file_new.st_mtim.tv_nsec){
     return true;
   } else {
     return false;
@@ -258,10 +258,11 @@ char* nb_read_file(char* file_name){ // old name shouldnt be nobuild.c. it shoul
   fseek(file.filep, 0, SEEK_END);
   
   file.filesize = ftell(file.filep);
-  file.buf = (char*)malloc(file.filesize);
+  file.buf = (char*)malloc(file.filesize+1);
   fseek(file.filep, 0, SEEK_SET);
   fread(file.buf, 1, file.filesize, file.filep);
   fclose(file.filep);
+  file.buf[file.filesize] = '\0'
   return file.buf;
 }
 
