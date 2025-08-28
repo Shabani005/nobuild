@@ -262,7 +262,7 @@ char* nb_read_file(char* file_name){ // old name shouldnt be nobuild.c. it shoul
   fseek(file.filep, 0, SEEK_SET);
   fread(file.buf, 1, file.filesize, file.filep);
   fclose(file.filep);
-  file.buf[file.filesize] = '\0'
+  file.buf[file.filesize] = '\0';
   return file.buf;
 }
 
