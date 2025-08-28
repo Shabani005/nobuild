@@ -13,6 +13,10 @@ typedef struct{
   char** value;
 } nb_arr;
 
+#define nb_append_da(nb_arr, ...) \
+    nb_append_va(nb_arr, \
+                       ((const char*[]){__VA_ARGS__}), \
+                       (sizeof((const char*[]){__VA_ARGS__})/sizeof(const char*)))
 
  typedef struct{
     FILE *filep;
@@ -52,6 +56,9 @@ bool nb_does_file_exist(char *filename);
 
 
 void nb_rebuild(char filename[]);
+
+char* nb_read_file(char* file_name);
+
 
 #ifdef NB_IMPLEMENTATION // make sure to define this before using the header
 
@@ -247,7 +254,25 @@ void nb_rebuild(char filename[]){
   }
 }
 
+char* nb_read_file(char* file_name){ // old name shouldnt be nobuild.c. it should be the name of the current file.
+  nb_file file; 
 
+  file.filep = fopen(file_name, "rb");
+  fseek(file.filep, 0, SEEK_END);
+  
+  file.filesize = ftell(file.filep);
+  file.buf = (char*)malloc(file.filesize);
+  fseek(file.filep, 0, SEEK_SET);
+  fread(file.buf, 1, file.filesize, file.filep);
+  fclose(file.filep);
+  return file.buf;
+}
+
+void nb_append_va(nb_arr *newarr, const char *items[], int count) {
+    for (int i = 0; i < count; i++) {
+        nb_append(newarr, (char*)items[i]);
+    }
+}
 
 #endif //NB_IMPLEMENTATION
 
