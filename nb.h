@@ -30,6 +30,7 @@ void nb_init(nb_arr *newarr, int initial_capacity);
 void nb_append(nb_arr *newarr, char *newval);
 void nb_append_int(nb_arr *newarr, int myint);
 void nb_append_float(nb_arr *newarr, float myfloat);
+void nb_append_va(nb_arr *newarr, const char *items[], int count);
 
 void nb_free(nb_arr *newarr);
 

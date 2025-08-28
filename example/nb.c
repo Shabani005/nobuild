@@ -1,16 +1,12 @@
+#define NB_IMPLEMENTATION
 #include "nb.h"
   
 int main(){
  
-  nb_arr cmd;
+  nb_arr cmd = {0};
 
-  nb_append(&cmd, "gcc");
-  nb_append(&cmd, "hello.c");
-  nb_append(&cmd, "-o myhello");
-  nb_append(&cmd, "-static");
-  
-  
-
+  nb_append_da(&cmd, "gcc", "-o myhello", "hello.c", "-static");
+    
   nb_print_info(&cmd);
   nb_cmd(&cmd);
   
