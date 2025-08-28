@@ -204,10 +204,7 @@ bool nb_did_file_change(char *filename){
 
 
 bool nb_does_file_exist(char *filename){
-  char buf[64];
-  sprintf(buf, "%s.new", filename);
-
-    if (access("test.c.new", F_OK) == 0){
+    if (access(filename, F_OK) == 0){
     return true;
   }
   return false;
