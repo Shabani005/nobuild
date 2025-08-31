@@ -245,7 +245,7 @@ void nb_rebuild(int argc, char **argv){
       nb_append(&cmd, "-o");
       nb_append(&cmd, fname);
       nb_append(&cmd, filename);
-      nb_print_info(&cmd);
+      // nb_print_info(&cmd);
       nb_cmd(&cmd);
 
       printf("[INFO] rebuilt %s\n", filename);
