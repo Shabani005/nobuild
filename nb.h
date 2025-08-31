@@ -25,11 +25,11 @@ typedef struct{
     char *buf;
   } nb_file;
 
-void nb_init(nb_arr *newarr, int initial_capacity);
+void nb_init(nb_arr *newarr, int initial_capacity); // obsolete
 
 void nb_append(nb_arr *newarr, char *newval);
-void nb_append_int(nb_arr *newarr, int myint);
-void nb_append_float(nb_arr *newarr, float myfloat);
+void nb_append_int(nb_arr *newarr, int myint); // will deprecate soon
+void nb_append_float(nb_arr *newarr, float myfloat); // will deprecate soon
 void nb_append_va(nb_arr *newarr, const char *items[], int count);
 
 void nb_free(nb_arr *newarr);
@@ -43,22 +43,18 @@ void nb_print_info(nb_arr *newarr);
 
 void nb_cmd(nb_arr *newarr);
 
-// void copy_file(char* old_file_name, char* new_file_name);
-
+// File utils
 void nb_copy_file(char* old_file_name, char* new_file_name);
+char* nb_read_file(char* file_name);
+bool nb_did_file_change(char *filename);
+bool nb_does_file_exist(char *filename);
 
 //bool needs_rebuild(); // need to implement rename file first to .old or something like nob does
 
 
-bool nb_did_file_change(char *filename);
-
-
-bool nb_does_file_exist(char *filename);
-
-
 void nb_rebuild(int argc, char **argv);
 
-char* nb_read_file(char* file_name);
+
 
 
 #ifdef NB_IMPLEMENTATION // make sure to define this before using the header
@@ -230,9 +226,9 @@ void nb_rebuild(int argc, char **argv){
   sprintf(cloned_file, "%s.old", filename); 
 
   if (nb_does_file_exist(cloned_file)){
-    printf("%s does exist\n", cloned_file);
+    // printf("%s does exist\n", cloned_file);
     if (nb_did_file_change(filename)){
-      printf("file did change\n");
+      printf("[Rebuilding]\n");
       nb_copy_file(filename, cloned_file);
 
       nb_arr cmd;
@@ -244,27 +240,29 @@ void nb_rebuild(int argc, char **argv){
       char *dot = strrchr(fname, '.');
       if (dot != NULL) {
         *dot = '\0';
-      }     
-      printf("fname is: %s\n", fname);  
-      
+      }      
       nb_append(&cmd, "gcc");
       nb_append(&cmd, "-o");
       nb_append(&cmd, fname);
       nb_append(&cmd, filename);
+      nb_print_info(&cmd);
       nb_cmd(&cmd);
 
-      nb_print_info(&cmd);
       printf("[INFO] rebuilt %s\n", filename);
       nb_free(&cmd);
+      // printf("[INFO] %s", argv)
 
-      // nb_append_da(&cmd, argv[0]);
-      // nb_print_info(&cmd);
+      printf("\n");
+
+      nb_append_da(&cmd, argv[0]);
+      nb_cmd(&cmd);
+            exit(1);
 
   } else {
-    printf("file did not change\n");
+    // printf("file did not change\n");
     }
   }else{
-    printf("created %s.old\n", filename);
+    // printf("created %s.old\n", filename);
     nb_copy_file(filename, cloned_file);
   }
 }
