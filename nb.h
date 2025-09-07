@@ -186,6 +186,11 @@ void nb_copy_file(char* old_file_name, char* new_file_name){ // old name shouldn
   nb_file old_file; 
   nb_file new_file;
 
+  if (!nb_does_file_exist){
+    printf("%s does not exit", old_file_name);
+    return;
+  }
+  
   old_file.filep = fopen(old_file_name, "rb");
   fseek(old_file.filep, 0, SEEK_END);
   
@@ -203,6 +208,11 @@ void nb_copy_file(char* old_file_name, char* new_file_name){ // old name shouldn
 bool nb_did_file_change(char *filename){
   struct stat file_old;
   stat(filename, &file_old);
+
+  if (!nb_does_file_exist){
+    printf("%s does not exist\n", filename);
+    return 0;
+  }
   
   struct stat file_new;
   char buf[64];
@@ -216,8 +226,9 @@ bool nb_did_file_change(char *filename){
 bool nb_does_file_exist(char *filename){
     if (access(filename, F_OK) == 0){
     return true;
-  }
+  } else {
   return false;
+  }
 }
 
 void nb_rebuild(int argc, char **argv){
@@ -254,7 +265,9 @@ void nb_rebuild(int argc, char **argv){
 
       printf("\n");
 
-      nb_append_da(&cmd, argv[0]);
+      for (int i=0; i<argc; ++i){
+        nb_append_da(&cmd, argv[i]);
+      }
       nb_cmd(&cmd);
             exit(1);
 
