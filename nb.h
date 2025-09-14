@@ -46,6 +46,7 @@ void nb_cmd(nb_arr *newarr);
 // File utils
 void nb_copy_file(char* old_file_name, char* new_file_name);
 char* nb_read_file(char* file_name);
+nb_file nb_read_file_c(char* file_name);
 bool nb_did_file_change(char *filename);
 bool nb_does_file_exist(char *filename);
 
@@ -279,6 +280,23 @@ void nb_rebuild(int argc, char **argv){
     nb_copy_file(filename, cloned_file);
   }
 }
+
+
+nb_file nb_read_file_c(char* file_name){ // old name shouldnt be nobuild.c. it should be the name of the current file. I should think more about adding error handling
+  nb_file file; 
+
+  file.filep = fopen(file_name, "rb");
+  fseek(file.filep, 0, SEEK_END);
+  
+  file.filesize = ftell(file.filep);
+  file.buf = (char*)malloc(file.filesize+1);
+  fseek(file.filep, 0, SEEK_SET);
+  fread(file.buf, 1, file.filesize, file.filep);
+  fclose(file.filep);
+  file.buf[file.filesize] = '\0';
+  return file;
+}
+
 
 char* nb_read_file(char* file_name){ // old name shouldnt be nobuild.c. it should be the name of the current file. I should think more about adding error handling
   nb_file file; 
