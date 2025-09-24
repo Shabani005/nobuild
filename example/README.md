@@ -1,3 +1,3 @@
-- we made a nb.c using the single header file. 
-- we built nb.c which doesnt need to link with any other external libraries.
-- now just get the executable and use it to build hello.c. or any other c file for that matter.
+- no need to recompile the builder. it rebuilds itself
+- nb_append_da introduced, variadic macro to append more than one value to the dynamic array 
+- nb_cmd autofrees nb_arr
