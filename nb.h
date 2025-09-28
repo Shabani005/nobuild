@@ -397,3 +397,4 @@ char** nb_split_impl(char* string, nb_opt opt){
 }
 #endif //NB_IMPLEMENTATION
 
+// add stripping and general nb_da_append later
