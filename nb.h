@@ -318,15 +318,15 @@ nb_file nb_read_file_c(char* file_name){ // old name shouldnt be nobuild.c. it s
 char* nb_read_file(char* file_name){ // old name shouldnt be nobuild.c. it should be the name of the current file. I should think more about adding error handling
   nb_file file; 
 
-  file.filep = fopen(file_name, "rb");
+  file.filep = fopen(file_name, "r");
   fseek(file.filep, 0, SEEK_END);
   
   file.filesize = ftell(file.filep);
   file.buf = (char*)malloc(file.filesize+1);
   fseek(file.filep, 0, SEEK_SET);
   fread(file.buf, 1, file.filesize, file.filep);
+  file.buf[file.filesize] = '\0'; // null termination
   fclose(file.filep);
-  file.buf[file.filesize] = '\0';
   return file.buf;
 }
 
