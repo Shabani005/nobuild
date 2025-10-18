@@ -7,8 +7,6 @@
 #include <string.h>
 #include <time.h>
 
-
-
 typedef struct {
   int debug;
 } nb_opt;
@@ -24,7 +22,17 @@ typedef struct{
     size_t filesize;
     int chars;
     char *buf;
-  } nb_file;
+} nb_file;
+
+typedef struct {
+  char** urls;
+  char** filenames;
+  size_t size;
+  size_t capacity;
+} nb_downloads;
+
+
+static nb_downloads nb_default_down;
 
 #define nb_append_da(nb_arr, ...) \
     nb_append_va(nb_arr, \
@@ -61,7 +69,8 @@ char* nb_read_file(char* file_name);
 nb_file nb_read_file_c(char* file_name);
 bool nb_did_file_change(char *filename);
 bool nb_does_file_exist(char *filename);
-
+void nb_end();
+void include_http_custom(const char* url, const char* filename);
 //bool needs_rebuild(); // need to implement rename file first to .old or something like nob does
 
 
@@ -395,6 +404,35 @@ char** nb_split_impl(char* string, nb_opt opt){
   }
   return split;
 }
+
+void include_http_custom(const char* url, const char* filename){ // this function is for builder not regular c file.
+  nb_arr cmd = {0};
+  if (nb_default_down.capacity == 0) {
+    nb_default_down.capacity = 256;
+    nb_default_down.size     = 0;
+    nb_default_down.filenames = malloc(sizeof(char*) * nb_default_down.capacity);
+    nb_default_down.urls      = malloc(sizeof(char*) * nb_default_down.capacity);
+  }
+  if (nb_default_down.size >= nb_default_down.capacity) {
+    nb_default_down.capacity*=2;
+    nb_default_down.filenames = realloc(nb_default_down.filenames, nb_default_down.capacity);
+    nb_default_down.urls      = realloc(nb_default_down.urls, nb_default_down.capacity);
+  }
+  nb_default_down.urls[nb_default_down.size]      = (char*)url;
+  nb_default_down.filenames[nb_default_down.size] = (char*)filename;
+  nb_default_down.size++;
+  nb_append_da(&cmd, "wget", "-q", "-O", filename, url);
+  nb_cmd(&cmd);
+}
+
+void nb_end(){
+  for (size_t i=0; i<nb_default_down.size; ++i){
+      // printf("debug\n");
+      if (!remove(nb_default_down.filenames[i])) exit(-1);
+      // printf("removed file: %s\n", nb_default_down.filenames[i]);
+  }
+}
+
 #endif //NB_IMPLEMENTATION
 
 // add stripping and general nb_da_append later
