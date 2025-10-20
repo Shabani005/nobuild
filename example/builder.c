@@ -1,5 +1,5 @@
 #define NB_IMPLEMENTATION
-#include "nb.h"
+#include "../nb.h"
   
 int main(int argc, char** argv){
  

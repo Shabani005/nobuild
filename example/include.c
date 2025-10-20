@@ -1,6 +1,5 @@
-#include <stddef.h>
 #define NB_IMPLEMENTATION
-#include "nb.h"
+#include "../nb.h"
 
 int main(){
   const char* url = "https://raw.githubusercontent.com/Shabani005/cml/refs/heads/master/cml.h";
