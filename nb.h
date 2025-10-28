@@ -6,6 +6,9 @@
 #include <stdbool.h>
 #include <string.h>
 #include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 typedef struct {
   int debug;
@@ -59,8 +62,6 @@ char* nb_strdup(const char* s); // make this void that uses realloc later.
 
 void nb_print(nb_arr *newarr);
 void nb_print_info(nb_arr *newarr);
-
-
 void nb_cmd(nb_arr *newarr);
 
 // File utils
@@ -69,28 +70,34 @@ char* nb_read_file(char* file_name);
 nb_file nb_read_file_c(char* file_name);
 bool nb_did_file_change(char *filename);
 bool nb_does_file_exist(char *filename);
+void nb_rebuild(int argc, char **argv);
 void nb_end();
 void include_http_custom(const char* url, const char* filename);
-//bool needs_rebuild(); // need to implement rename file first to .old or something like nob does
+//bool needs_rebuild(); // need to implement rename file first to .old or something like nob does TODO
 
-
-void nb_rebuild(int argc, char **argv);
 
 // Misc utils
-int nb_compf(const void *a, const void *b);
-int nb_compi(const void *a, const void *b);
-void nb_qsortf_impl(void *base, size_t nmemb); // these    functions      macros
-void nb_qsorti_impl(void *base, size_t nmemb); //      two          have 
+int   nb_compf(const void *a, const void *b);
+int   nb_compi(const void *a, const void *b);
+char* nb_slice_str(char* a, size_t start, size_t end); // python slicing in c :Kappa:
+void  nb_qsortf_impl(void *base, size_t nmemb); // these    functions      macros
+void  nb_qsorti_impl(void *base, size_t nmemb); //      two          have 
 
 
 
 #ifdef NB_IMPLEMENTATION // make sure to define this before using the header
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 
+
+
+char* nb_slice_str(char* a, size_t start, size_t end){
+  size_t len = end-start;
+  char* result = malloc(len+1);
+  memmove(result, a+start, len);
+  result[len] = '\0';
+  return result;
+}
 
  
 /*
