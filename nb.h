@@ -428,7 +428,7 @@ void include_http_custom(const char* url, const char* filename){ // this functio
   nb_default_down.urls[nb_default_down.size]      = (char*)url;
   nb_default_down.filenames[nb_default_down.size] = (char*)filename;
   nb_default_down.size++;
-  nb_append_da(&cmd, "wget", "-q", "-O", filename, url);
+  nb_append_da(&cmd, "wget", "-q", "-O", filename, url); // TODO: use libcurl or implement own http thingy
   nb_cmd(&cmd);
 }
 
@@ -442,4 +442,4 @@ void nb_end(){
 
 #endif //NB_IMPLEMENTATION
 
-// add stripping and general nb_da_append later
+// TODO: add #ifdef NB_STRIP_PREFIX in the future
