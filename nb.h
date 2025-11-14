@@ -67,6 +67,7 @@ void nb_cmd(nb_arr *newarr);
 // File utils
 void nb_copy_file(char* old_file_name, char* new_file_name);
 char* nb_read_file(char* file_name);
+void nb_write_file(char* name, char* buf);
 nb_file nb_read_file_c(char* file_name);
 bool nb_did_file_change(char *filename);
 bool nb_does_file_exist(char *filename);
@@ -175,31 +176,30 @@ void nb_cmd(nb_arr *newarr) {
         return;
     }
 
+    size_t total_len = 0;
+    for (int i = 0; i < newarr->arrsize; i++) {
+        total_len += strlen(newarr->value[i]) + 1;
+    }
 
+    char *cmd = malloc(total_len + 1 );
+    if (!cmd) {
+        fprintf(stderr, "Allocation failed in nb_cmd\n");
+        return;
+    }
 
-    // Allocate bufferchar
-    char* cmd = (char*) malloc(sizeof(char*) * newarr->capacity);
-
-    cmd[0] = '\0'; 
+    cmd[0] = '\0';
     for (int i = 0; i < newarr->arrsize; i++) {
         strcat(cmd, newarr->value[i]);
-        if (i < newarr->arrsize - 1) {
-            strcat(cmd, " ");
-        }
+        if (i < newarr->arrsize - 1) strcat(cmd, " ");
     }
 
     printf("[CMD] %s\n", cmd);
-
-    if (system(cmd) == -1) {
-        perror("system");
-    }
+    int ret = system(cmd);
+    if (ret == -1) perror("system");
 
     free(cmd);
-    for (int i=0; i < newarr->arrsize; ++i){
-      nb_free(newarr);
-    }
+    nb_free(newarr); 
 }
-
 
 // compile func that requires c_file to run otherwise returns error like <please return usage>
 void nb_com(nb_arr *newarr){  
@@ -215,6 +215,17 @@ void nb_com(nb_arr *newarr){
 void append_c_file(FILE *filepointer){
 
 }
+
+
+void nb_write_file(char* name, char* buf){ // old name shouldnt be nobuild.c. it should be the name of the current file. 
+  nb_file new_file;
+
+  new_file.filep = fopen(name, "wb");
+  fwrite(buf, 1, strlen(buf), new_file.filep);
+  fclose(new_file.filep);
+  // printf("Current buf size: %zu\n", strlen(buf));
+}
+
 
 void nb_copy_file(char* old_file_name, char* new_file_name){ // old name shouldnt be nobuild.c. it should be the name of the current file.
   nb_file old_file; 
