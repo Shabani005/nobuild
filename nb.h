@@ -326,7 +326,7 @@ void nb_rebuild(int argc, char **argv){
 }
 
 
-nb_file nb_read_file_c(char* file_name){ // old name shouldnt be nobuild.c. it should be the name of the current file. I should think more about adding error handling
+nb_file nb_read_file_c(char* file_name){ 
   nb_file file; 
 
   file.filep = fopen(file_name, "rb");
@@ -342,7 +342,7 @@ nb_file nb_read_file_c(char* file_name){ // old name shouldnt be nobuild.c. it s
 }
 
 
-char* nb_read_file(char* file_name){ // old name shouldnt be nobuild.c. it should be the name of the current file. I should think more about adding error handling
+char* nb_read_file(char* file_name){
   nb_file file; 
 
   file.filep = fopen(file_name, "r");
