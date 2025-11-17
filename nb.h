@@ -83,15 +83,10 @@ int   nb_compi(const void *a, const void *b);
 char* nb_slice_str(char* a, size_t start, size_t end); // python slicing in c :Kappa:
 void  nb_qsortf_impl(void *base, size_t nmemb); // these    functions      macros
 void  nb_qsorti_impl(void *base, size_t nmemb); //      two          have 
-
-
+float nb_time();
+float nb_sec_to_msec(float sec);
 
 #ifdef NB_IMPLEMENTATION // make sure to define this before using the header
-
-
-
-
-
 char* nb_slice_str(char* a, size_t start, size_t end){
   size_t len = end-start;
   char* result = malloc(len+1);
@@ -451,6 +446,14 @@ void nb_end(){
   }
 }
 
+float nb_time(){
+  clock_t time = clock();
+  return (float)time/CLOCKS_PER_SEC; 
+}
+
+float nb_sec_to_msec(float sec){
+  return sec*1000;
+}
 #endif //NB_IMPLEMENTATION
 
-// TODO: add #ifdef NB_STRIP_PREFIX in the future
+// TODO: add #ifdef NB_STRIP_PREFIX in the future 
