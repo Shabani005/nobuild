@@ -2,7 +2,6 @@
 #include "../nb.h"
   
 int main(int argc, char** argv){
- 
   nb_rebuild(argc, argv);
   
   nb_arr cmd = {0};

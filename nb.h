@@ -72,6 +72,7 @@ nb_file nb_read_file_c(char* file_name);
 bool nb_did_file_change(char *filename);
 bool nb_does_file_exist(char *filename);
 void nb_rebuild(int argc, char **argv);
+void nb_mkdir_if_not_exist(char* dirname);
 void nb_end();
 void include_http_custom(const char* url, const char* filename);
 //bool needs_rebuild(); // need to implement rename file first to .old or something like nob does TODO
@@ -453,6 +454,17 @@ float nb_time(){
 
 float nb_sec_to_msec(float sec){
   return sec*1000;
+}
+
+void nb_mkdir_if_not_exist(char* dirname){
+  #ifdef _WIN32
+  fprintf(stderr, "not implemented");
+  return;
+  #endif
+
+  nb_arr cmd = {0};
+  nb_append_da(&cmd, "mkdir", "-p", dirname);
+  nb_cmd(&cmd);
 }
 #endif //NB_IMPLEMENTATION
 
