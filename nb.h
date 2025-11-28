@@ -452,8 +452,9 @@ void nb_end(){
 }
 
 float nb_time(){
-  clock_t time = clock();
-  return (float)time/CLOCKS_PER_SEC; 
+  struct timespec t;
+  clock_gettime(CLOCK_MONOTONIC, &t);
+  return t.tv_sec + t.tv_nsec / 1e9;
 }
 
 float nb_sec_to_msec(float sec){
