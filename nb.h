@@ -167,6 +167,10 @@ void nb_free(nb_arr *newarr){
 
 
 void nb_cmd(nb_arr *newarr) {
+  #if !defined(__GNUC__) || defined(__clang__)
+  fprintf(stderr, "doesnt support windows for now");
+  return;
+  #endif
     if (newarr->arrsize < 1) {
         printf("USAGE: provide more parameters\n");
         return;
