@@ -68,6 +68,7 @@ void nb_cmd(nb_arr *newarr);
 void nb_copy_file(char* old_file_name, char* new_file_name);
 char* nb_read_file(char* file_name);
 void nb_write_file(char* name, char* buf);
+char* hexdump(char* filename);
 nb_file nb_read_file_c(char* file_name);
 bool nb_did_file_change(char *filename);
 bool nb_does_file_exist(char *filename);
@@ -470,6 +471,43 @@ void nb_mkdir_if_not_exist(char* dirname){
   nb_arr cmd = {0};
   nb_append_da(&cmd, "mkdir", "-p", dirname);
   nb_cmd(&cmd);
+}
+
+char* hexdump(char* filename){  
+  if (!nb_does_file_exist(filename)){
+    fprintf(stderr, "File: '%s' does not exist\n", filename);
+    return NULL;
+  }
+  
+  FILE *f = fopen(filename, "rb");
+  fseek(f, 0, SEEK_END);
+  size_t fsize = ftell(f);
+
+  char *buf = (char*)malloc(sizeof(char) * fsize+1);
+
+  fseek(f, 0, SEEK_SET);  
+  fread(buf, 1, sizeof(char)*fsize, f);
+  buf[fsize+1] = '\0';
+
+  char *newbuf = (char*)malloc(sizeof(char) * fsize+1);
+
+  
+  for (size_t i=0; i < fsize; ++i){
+    sprintf(newbuf, "%02X ", buf[i]);
+  }
+  sprintf(newbuf, "\n");
+  return newbuf;
+}
+
+int main(int argc, char **argv){
+  if (argc < 2 || argc > 3){
+    fprintf(stderr, "Usage: %s <file>\n", argv[0]);
+    return 1;
+  }
+
+  printf("%s", hexdump(argv[1]));
+  
+  return 0;
 }
 #endif //NB_IMPLEMENTATION
 
