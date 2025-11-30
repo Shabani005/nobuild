@@ -498,17 +498,6 @@ char* hexdump(char* filename){
   sprintf(newbuf, "\n");
   return newbuf;
 }
-
-int main(int argc, char **argv){
-  if (argc < 2 || argc > 3){
-    fprintf(stderr, "Usage: %s <file>\n", argv[0]);
-    return 1;
-  }
-
-  printf("%s", hexdump(argv[1]));
-  
-  return 0;
-}
 #endif //NB_IMPLEMENTATION
 
 // TODO: add #ifdef NB_STRIP_PREFIX in the future 
