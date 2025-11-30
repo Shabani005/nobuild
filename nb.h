@@ -68,7 +68,7 @@ void nb_cmd(nb_arr *newarr);
 void nb_copy_file(char* old_file_name, char* new_file_name);
 char* nb_read_file(char* file_name);
 void nb_write_file(char* name, char* buf);
-char* hexdump(char* filename);
+char* nb_hexdump(char* filename);
 nb_file nb_read_file_c(char* file_name);
 bool nb_did_file_change(char *filename);
 bool nb_does_file_exist(char *filename);
@@ -473,7 +473,7 @@ void nb_mkdir_if_not_exist(char* dirname){
   nb_cmd(&cmd);
 }
 
-char* hexdump(char* filename){  
+char* nb_hexdump(char* filename){  
   if (!nb_does_file_exist(filename)){
     fprintf(stderr, "File: '%s' does not exist\n", filename);
     return NULL;
@@ -483,20 +483,22 @@ char* hexdump(char* filename){
   fseek(f, 0, SEEK_END);
   size_t fsize = ftell(f);
 
-  char *buf = (char*)malloc(sizeof(char) * fsize+1);
+  unsigned char *buf = malloc(fsize);
 
   fseek(f, 0, SEEK_SET);  
   fread(buf, 1, sizeof(char)*fsize, f);
   buf[fsize+1] = '\0';
 
-  char *newbuf = (char*)malloc(sizeof(char) * fsize+1);
-
+  char *newbuf = (char*)malloc(sizeof(char) * fsize * 3+ 1);
+  char *p = newbuf;
   
   for (size_t i=0; i < fsize; ++i){
-    sprintf(newbuf, "%02X ", buf[i]);
+    p += sprintf(p, "%02X ", buf[i]);
   }
-  sprintf(newbuf, "\n");
+  *p = '\0';
   return newbuf;
+
+  fclose(f);
 }
 #endif //NB_IMPLEMENTATION
 
