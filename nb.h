@@ -36,7 +36,8 @@ typedef struct {
 
 typedef struct {
   size_t count;
-} nb_hexinfo;
+  char** values;
+} nb_hexinfo; // TODO: add more metadata to hexinfo
 
 static nb_downloads nb_default_down;
 
