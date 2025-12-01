@@ -34,6 +34,9 @@ typedef struct {
   size_t capacity;
 } nb_downloads;
 
+typedef struct {
+  size_t count;
+} nb_hexinfo;
 
 static nb_downloads nb_default_down;
 
@@ -47,6 +50,10 @@ static nb_downloads nb_default_down;
 #define nb_qsortf(arr) nb_qsortf_impl((arr), sizeof(arr)/sizeof(arr[0]))
 #define nb_qsorti(arr) nb_qsorti_impl((arr), sizeof(arr)/sizeof(arr[0]))
 #define nb_split(string, ...) nb_split_impl(string, (nb_opt) {__VA_ARGS__})
+
+static nb_hexinfo nb_default_info_h = {.count=0};
+
+#define nb_hexdump(filename) nb_hexdump_generic(filename, &nb_default_info_h)
 
 void nb_init(nb_arr *newarr, int initial_capacity); // obsolete
 
@@ -68,7 +75,7 @@ void nb_cmd(nb_arr *newarr);
 void nb_copy_file(char* old_file_name, char* new_file_name);
 char* nb_read_file(char* file_name);
 void nb_write_file(char* name, char* buf);
-char* nb_hexdump(char* filename);
+char* nb_hexdump_generic(char* filename, nb_hexinfo *info);
 nb_file nb_read_file_c(char* file_name);
 bool nb_did_file_change(char *filename);
 bool nb_does_file_exist(char *filename);
@@ -473,7 +480,7 @@ void nb_mkdir_if_not_exist(char* dirname){
   nb_cmd(&cmd);
 }
 
-char* nb_hexdump(char* filename){  
+char* nb_hexdump_generic(char* filename, nb_hexinfo *info){  
   if (!nb_does_file_exist(filename)){
     fprintf(stderr, "File: '%s' does not exist\n", filename);
     return NULL;
@@ -491,10 +498,15 @@ char* nb_hexdump(char* filename){
 
   char *newbuf = (char*)malloc(sizeof(char) * fsize * 3+ 1);
   char *p = newbuf;
-  
+
+  size_t count = 0;
+
   for (size_t i=0; i < fsize; ++i){
     p += sprintf(p, "%02X ", buf[i]);
+    count++;
   }
+  info->count = count;
+  // printf("count: %zu\n", count);
   *p = '\0';
   return newbuf;
 
