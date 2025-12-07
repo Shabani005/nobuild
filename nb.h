@@ -41,15 +41,29 @@ typedef struct {
   char** values;
 } nb_hexinfo; // TODO: add more metadata to hexinfo
 
-#define NB_AR_SIZE 1024*1024
-
 typedef struct {
   uint8_t *base;
   size_t size;
   size_t capacity;
 } nb_Arena;
 
+typedef struct{
+  char**  value;
+  size_t* len;
+  size_t  count;
+  size_t  capacity;
+} nb_ht_Strings;
+
+typedef struct{
+  char**    value;
+  uint32_t* hash;
+  size_t    count;
+  size_t    capacity; 
+} nb_ht_table;
+
 // Defaults
+#define NB_AR_SIZE 1024*1024
+#define NB_TABLE_SIZE 1024
 static nb_Arena *default_arena = NULL;
 static nb_downloads nb_default_down;
 static nb_hexinfo nb_default_info_h = {.count=0};
@@ -67,6 +81,7 @@ static void ensure_default_arena(void) {
   }
 }
 
+// Macros
 #define nb_ar_alloc(size)  ( ensure_default_arena(), nb_ar_alloc_generic(default_arena, size) )
 #define nb_ar_free()       ( ensure_default_arena(), nb_ar_free_generic(default_arena) )
 #define nb_ar_reset()      ( ensure_default_arena(), nb_ar_reset_generic(default_arena) )
@@ -77,18 +92,14 @@ static void ensure_default_arena(void) {
                        ((const char*[]){__VA_ARGS__}), \
                        (sizeof((const char*[]){__VA_ARGS__})/sizeof(const char*)))
 
-
 #define nb_qsortsa(arr) nb_qsorts_impl((arr), sizeof(arr)/sizeof(arr[0]))
 #define nb_qsortf(arr) nb_qsortf_impl((arr), sizeof(arr)/sizeof(arr[0]))
 #define nb_qsorti(arr) nb_qsorti_impl((arr), sizeof(arr)/sizeof(arr[0]))
 #define nb_split(string, ...) nb_split_impl(string, (nb_opt) {__VA_ARGS__})
-
-
-
 #define nb_hexdump(filename) nb_hexdump_generic(filename, &nb_default_info_h)
 
+// "Build" System
 void nb_init(nb_arr *newarr, int initial_capacity); // obsolete
-
 void nb_append(nb_arr *newarr, char *newval);
 void nb_append_int(nb_arr *newarr, int myint); // will deprecate soon
 void nb_append_float(nb_arr *newarr, float myfloat); // will deprecate soon
@@ -119,6 +130,7 @@ void include_http_custom(const char* url, const char* filename);
 //bool needs_rebuild(); // need to implement rename file first to .old or something like nob does TODO
 
 
+
 // Misc utils
 int   nb_compf(const void *a, const void *b);
 int   nb_compi(const void *a, const void *b);
@@ -127,6 +139,12 @@ void  nb_qsortf_impl(void *base, size_t nmemb); // these    functions      macro
 void  nb_qsorti_impl(void *base, size_t nmemb); //      two          have 
 float nb_time();
 float nb_sec_to_msec(float sec);
+
+// Hash Table Utils
+uint32_t nb_ht_hash(const char* input, size_t size);
+size_t   nb_ht_hash_index(nb_ht_table *t, const char *value);
+void     nb_ht_hash_append(nb_ht_table *t, const char *value);
+void     nb_ht_string_append(nb_ht_Strings* s, char* value);
 
 #ifdef NB_IMPLEMENTATION // make sure to define this before using the header
 char* nb_slice_str(char* a, size_t start, size_t end){
@@ -137,14 +155,7 @@ char* nb_slice_str(char* a, size_t start, size_t end){
   return result;
 }
 
- 
-/*
-  char* nb_strdup(const char* s) {
-    char* d = malloc(strlen(s) + 1);
-    if (d) strcpy(d, s);
-    return d;
-}
-*/
+
 
 
 void nb_init(nb_arr *newarr, int initial_capacity){
@@ -597,6 +608,99 @@ void nb_ar_free_generic(nb_Arena *a){
     munmap(a->base, a->capacity);
     free(a);
   }
+}
+
+
+uint32_t nb_ht_hash(const char* input, size_t size){
+  uint32_t total = 0;
+  for (size_t i=0; i<size; ++i){
+    total+= (uint32_t)input[i];
+  }
+  return total;
+}
+
+size_t  nb_ht_hash_index(nb_ht_table *t, const char *value) {
+    uint32_t hashv = nb_ht_hash(value, strlen(value));
+    uint32_t start = hashv; // to detect full table loop
+
+    while (t->value[hashv] != NULL) {
+        if (strcmp(t->value[hashv], value) == 0) {
+            // Found it
+            // printf("Found '%s' at index %u\n", value, hashv);
+            return hashv;
+        }
+
+        // Collision — probe next index
+        hashv = (hashv + 1) % NB_TABLE_SIZE;
+
+        if (hashv == start) {
+            fprintf(stderr, "Error: hash table is full\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    // Empty slot found
+    // printf("Inserting '%s' at index %u\n", value, hashv);
+    t->value[hashv] = strdup(value);
+    return hashv;
+}
+
+void nb_ht_hash_append(nb_ht_table *t, const char *value) {
+    if (t->capacity == 0) {
+        t->capacity = 10000;
+        t->count = 0;
+        t->value = calloc(t->capacity, sizeof(char *));
+        t->hash = calloc(t->capacity, sizeof(uint32_t));
+    }
+
+    if (t->count >= t->capacity * 0.7) { 
+        t->capacity *= 2;
+        t->value = realloc(t->value, sizeof(char*) * t->capacity);
+        t->hash  = realloc(t->hash, sizeof(uint32_t) * t->capacity);
+        memset(t->value + t->count, 0,
+               sizeof(char*) * (t->capacity - t->count));
+        memset(t->hash + t->count, 0,
+               sizeof(uint32_t) * (t->capacity - t->count));
+    }
+
+    uint32_t hashv = nb_ht_hash(value, strlen(value)) % t->capacity; 
+    uint32_t start = hashv;                       
+
+    while (t->value[hashv] != NULL) {
+        if (strcmp(t->value[hashv], value) == 0) {
+            // printf("Value '%s' already exists at index %u\n", value, hashv);
+            return;
+        }
+
+        hashv = (hashv + 1) % t->capacity;
+
+        if (hashv == start) {
+            fprintf(stderr, "Error: hash table full\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+    t->value[hashv] = strdup(value);
+    t->hash[hashv] = hashv;
+    t->count++;
+    // printf("Inserted '%s' at index %u\n", value, hashv);
+}
+
+
+void nb_ht_string_append(nb_ht_Strings* s, char* value){
+  if (s->capacity == 0) {
+    s->capacity = 256;
+    s->count = 0;
+    s->value = malloc(sizeof(char*)*s->capacity);
+    s->len = malloc(sizeof(size_t)*s->capacity);
+  }
+  if (s->count >= s->capacity){ s->capacity +=2;
+    s->value = realloc(s->value, sizeof(char*)*s->capacity);
+    s->len = realloc(s->len, sizeof(size_t)*s->capacity); 
+  }
+  s->value[s->count] = value;
+  char* buf = strdup(value); 
+  s->len[s->count] = strlen(buf); // this may not work
+  s->count++;
 }
 #endif //NB_IMPLEMENTATION
 
