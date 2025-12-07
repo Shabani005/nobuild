@@ -65,8 +65,9 @@ void nb_append_va(nb_arr *newarr, const char *items[], int count);
 
 void nb_free(nb_arr *newarr);
 
-
+// String utils
 char* nb_strdup(const char* s); // make this void that uses realloc later.
+char** nb_split_by_delim(char* str, char delim);
 
 void nb_print(nb_arr *newarr);
 void nb_print_info(nb_arr *newarr);
@@ -512,6 +513,28 @@ char* nb_hexdump_generic(char* filename, nb_hexinfo *info){
   return newbuf;
 
   fclose(f);
+}
+
+char** nb_split_by_delim(char* str, char delim){
+  size_t len = strlen(str);
+  size_t start = 0;
+  size_t token_c = 0;
+  
+  char buf[6400];
+  char **full = malloc(sizeof(char*)* len+1);
+
+  for (size_t i=0; i<=len; ++i){
+    if (str[i] == delim || str[i] == '\0') {
+      size_t token_len = i-start;
+      memcpy(buf, str+start, token_len);
+
+      buf[token_len] = '\0';
+      start = i+1;
+      full[token_c++] = strdup(buf);
+    }
+  }
+  full[token_c] = NULL;
+  return full;
 }
 #endif //NB_IMPLEMENTATION
 
