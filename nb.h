@@ -9,6 +9,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/mman.h>
+#include <stdint.h>
 
 typedef struct {
   int debug;
@@ -39,7 +41,36 @@ typedef struct {
   char** values;
 } nb_hexinfo; // TODO: add more metadata to hexinfo
 
+#define NB_AR_SIZE 1024*1024
+
+typedef struct {
+  uint8_t *base;
+  size_t size;
+  size_t capacity;
+} nb_Arena;
+
+// Defaults
+static nb_Arena *default_arena = NULL;
 static nb_downloads nb_default_down;
+static nb_hexinfo nb_default_info_h = {.count=0};
+
+
+// Arena 
+nb_Arena *nb_ar_init(size_t cap);
+void* nb_ar_alloc_generic(nb_Arena *a, size_t size);
+void nb_ar_free_generic(nb_Arena *a);
+void nb_ar_reset_generic(nb_Arena *a); 
+
+static void ensure_default_arena(void) {
+  if (!default_arena) {
+    default_arena = nb_ar_init(NB_AR_SIZE);
+  }
+}
+
+#define nb_ar_alloc(size)  ( ensure_default_arena(), nb_ar_alloc_generic(default_arena, size) )
+#define nb_ar_free()       ( ensure_default_arena(), nb_ar_free_generic(default_arena) )
+#define nb_ar_reset()      ( ensure_default_arena(), nb_ar_reset_generic(default_arena) )
+
 
 #define nb_append_da(nb_arr, ...) \
     nb_append_va(nb_arr, \
@@ -52,7 +83,7 @@ static nb_downloads nb_default_down;
 #define nb_qsorti(arr) nb_qsorti_impl((arr), sizeof(arr)/sizeof(arr[0]))
 #define nb_split(string, ...) nb_split_impl(string, (nb_opt) {__VA_ARGS__})
 
-static nb_hexinfo nb_default_info_h = {.count=0};
+
 
 #define nb_hexdump(filename) nb_hexdump_generic(filename, &nb_default_info_h)
 
@@ -535,6 +566,37 @@ char** nb_split_by_delim(char* str, char delim){
   }
   full[token_c] = NULL;
   return full;
+}
+
+nb_Arena *nb_ar_init(size_t cap){
+  nb_Arena *a = malloc(sizeof(nb_Arena));
+  void *arena = mmap(NULL, cap, PROT_WRITE | PROT_READ, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+  a->capacity = cap;
+  a->size = 0;
+  a->base = arena;
+
+  return a;
+}
+
+void *nb_ar_alloc_generic(nb_Arena *a, size_t size){
+  if (a->size + size > a->capacity) { 
+    fprintf(stderr, "Writing into out of bounds memory\n");
+    abort();
+  }
+  void* ptr = a->base + a->size;
+  a->size += size;
+  return ptr;
+}
+
+void nb_ar_reset_generic(nb_Arena *a){
+  a->size = 0; // We just overwrite old data
+}
+
+void nb_ar_free_generic(nb_Arena *a){
+  if (a->base){
+    munmap(a->base, a->capacity);
+    free(a);
+  }
 }
 #endif //NB_IMPLEMENTATION
 
