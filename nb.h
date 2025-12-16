@@ -169,7 +169,7 @@ void nb_init(nb_arr *newarr, int initial_capacity){
 void nb_append(nb_arr *newarr, char *newval){
   if (newarr->value == NULL){
     newarr->capacity =16;
-  if (newarr->capacity > 16 | newarr->arrsize > newarr->capacity) {
+  if (newarr->capacity > 16 || newarr->arrsize > newarr->capacity) {
     newarr->capacity *=2;
   }
     newarr->value = (char**)realloc(newarr->value, sizeof(char*) * newarr->capacity);
