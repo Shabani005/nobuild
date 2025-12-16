@@ -17,8 +17,8 @@ typedef struct {
 } nb_opt;
 
 typedef struct{
-  int capacity;
-  int arrsize;
+  size_t capacity;
+  size_t arrsize;
   char** value;
 } nb_arr;
 
@@ -63,7 +63,7 @@ typedef struct{
 
 // Defaults
 #define NB_AR_SIZE 1024*1024
-#define NB_TABLE_SIZE 1024
+#define NB_TABLE_SIZE 1 << 21
 static nb_Arena *default_arena = NULL;
 static nb_downloads nb_default_down;
 static nb_hexinfo nb_default_info_h = {.count=0};
@@ -165,16 +165,20 @@ void nb_init(nb_arr *newarr, int initial_capacity){
 }
 
 
-// later increase cap by size of new sheiSSe
-void nb_append(nb_arr *newarr, char *newval){
-  if (newarr->value == NULL){
-    newarr->capacity =16;
-  if (newarr->capacity > 16 || newarr->arrsize > newarr->capacity) {
-    newarr->capacity *=2;
-  }
-    newarr->value = (char**)realloc(newarr->value, sizeof(char*) * newarr->capacity);
-  } 
-    newarr->value[newarr->arrsize++] = strdup(newval);
+void nb_append(nb_arr *a, char *val) {
+    if (a->capacity == 0) {
+        a->capacity = 16;
+        a->arrsize = 0;
+        a->value = malloc(sizeof(char *) * a->capacity);
+    }
+
+    if (a->arrsize >= a->capacity) {
+        a->capacity *= 2;
+        a->value = realloc(a->value,
+                            sizeof(char *) * a->capacity);
+    }
+
+    a->value[a->arrsize++] = strdup(val);
 }
 
 void nb_append_int(nb_arr *newarr, int myint){
@@ -657,7 +661,7 @@ size_t  nb_ht_hash_index(nb_ht_table *t, const char *value) {
 
 void nb_ht_hash_append(nb_ht_table *t, const char *value) {
     if (t->capacity == 0) {
-        t->capacity = 10000;
+        t->capacity = NB_TABLE_SIZE;
         t->count = 0;
         t->value = calloc(t->capacity, sizeof(char *));
         t->hash = calloc(t->capacity, sizeof(uint32_t));
