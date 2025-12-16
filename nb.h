@@ -611,16 +611,26 @@ void nb_ar_free_generic(nb_Arena *a){
 }
 
 
-uint32_t nb_ht_hash(const char* input, size_t size){
-  uint32_t total = 0;
-  for (size_t i=0; i<size; ++i){
-    total+= (uint32_t)input[i];
-  }
-  return total;
+uint32_t nb_ht_hash(const char *s, size_t len) // Bob Jenkins OAT hash
+{
+    unsigned char *p = (unsigned char*) s;
+    uint32_t h = 0;
+
+    while(len--) {
+        h += *p++;
+        h += (h << 10);
+        h ^= (h >> 6);
+    }
+
+    h += (h << 3);
+    h ^= (h >> 11);
+    h += (h << 15);
+
+    return h;
 }
 
 size_t  nb_ht_hash_index(nb_ht_table *t, const char *value) {
-    uint32_t hashv = nb_ht_hash(value, strlen(value));
+    uint32_t hashv = nb_ht_hash(value, strlen(value)) % NB_TABLE_SIZE;
     uint32_t start = hashv; // to detect full table loop
 
     while (t->value[hashv] != NULL) {
