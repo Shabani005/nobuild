@@ -61,6 +61,13 @@ typedef struct{
   size_t    capacity; 
 } nb_ht_table;
 
+
+typedef struct {
+  char* buf;
+  size_t len;
+} nb_xxd_info;
+
+
 // Defaults
 #define NB_AR_SIZE 1024*1024
 #define NB_TABLE_SIZE 1 << 21
@@ -110,16 +117,20 @@ void nb_free(nb_arr *newarr);
 // String utils
 char* nb_strdup(const char* s); // make this void that uses realloc later.
 char** nb_split_by_delim(char* str, char delim);
+char* nb_append_null(char* buf, size_t len);
 
 void nb_print(nb_arr *newarr);
 void nb_print_info(nb_arr *newarr);
 void nb_cmd(nb_arr *newarr);
+void nb_cmdq(nb_arr *newarr);
 
 // File utils
 void nb_copy_file(char* old_file_name, char* new_file_name);
 char* nb_read_file(char* file_name);
 void nb_write_file(char* name, char* buf);
 char* nb_hexdump_generic(char* filename, nb_hexinfo *info);
+
+char* nb_xxd(char* filename, nb_xxd_info *info, char* outname);
 nb_file nb_read_file_c(char* file_name);
 bool nb_did_file_change(char *filename);
 bool nb_does_file_exist(char *filename);
@@ -250,6 +261,42 @@ void nb_cmd(nb_arr *newarr) {
     }
 
     printf("[CMD] %s\n", cmd);
+    int ret = system(cmd);
+    if (ret == -1) perror("system");
+
+    free(cmd);
+    nb_free(newarr); 
+}
+
+
+void nb_cmdq(nb_arr *newarr) {
+  #if !defined(__GNUC__) || defined(__clang__)
+  fprintf(stderr, "doesnt support windows for now");
+  return;
+  #endif
+    if (newarr->arrsize < 1) {
+        printf("USAGE: provide more parameters\n");
+        return;
+    }
+
+    size_t total_len = 0;
+    for (int i = 0; i < newarr->arrsize; i++) {
+        total_len += strlen(newarr->value[i]) + 1;
+    }
+
+    char *cmd = malloc(total_len + 1 );
+    if (!cmd) {
+        fprintf(stderr, "Allocation failed in nb_cmd\n");
+        return;
+    }
+
+    cmd[0] = '\0';
+    for (int i = 0; i < newarr->arrsize; i++) {
+        strcat(cmd, newarr->value[i]);
+        if (i < newarr->arrsize - 1) strcat(cmd, " ");
+    }
+
+    // printf("[CMD] %s\n", cmd);
     int ret = system(cmd);
     if (ret == -1) perror("system");
 
@@ -716,6 +763,72 @@ void nb_ht_string_append(nb_ht_Strings* s, char* value){
   s->len[s->count] = strlen(buf); // this may not work
   s->count++;
 }
+
+char* nb_xxd(char* filename, nb_xxd_info *info, char* outname){  
+  if (!nb_does_file_exist(filename)){
+    fprintf(stderr, "File: '%s' does not exist\n", filename);
+    return NULL;
+  }
+  
+  FILE *f = fopen(filename, "rb");
+  fseek(f, 0, SEEK_END);
+  size_t fsize = ftell(f);
+
+  unsigned char *buf = malloc(fsize);
+
+  fseek(f, 0, SEEK_SET);  
+  fread(buf, 1, sizeof(char)*fsize, f);
+  buf[fsize+1] = '\0';
+
+  // TODO: unhardcode values
+
+  char *newbuf = (char*)malloc(sizeof(char) * fsize * 20+ 1);
+  char *p = newbuf;
+
+
+  char* otherbuf = (char*)malloc(sizeof(char) * fsize * 30+ 1);
+  char* p2 = otherbuf;  
+
+  size_t count = 0; 
+ 
+  // char test[2] = {0x31, 0x30}; 
+ 
+  // should probably do <= to ignore last thing
+
+  for (size_t i=1; i+1 < fsize; ++i){
+    p += sprintf(p, "0x%02x, ", buf[i]);
+    count++;
+  }
+  info->len = count;
+
+  *p = '\0';
+  newbuf[count*10] = '\0';
+
+  // p should be null terminated?
+  // 
+  p2 += sprintf(p2, "char %s[%zu] = {", outname, count);
+  p2 += sprintf(p2, newbuf);
+  p2 += sprintf(p2, "};\n");
+
+  p2 += sprintf(p2, "int %s_count = %zu;", outname, count);
+  
+  // printf("%s\n", newbuf);
+  // printf("%zu\n", count);
+  // printf("count: %zu\n", count);
+  // *p = '\0';
+  return otherbuf;
+
+  fclose(f);
+}
+
+
+char* nb_append_null(char* buf, size_t len){
+  char *newbuf = malloc(sizeof(char*) * len);
+  newbuf = buf;
+  newbuf[len] = '\0';
+  return newbuf;
+}
+
 #endif //NB_IMPLEMENTATION
 
 // TODO: add #ifdef NB_STRIP_PREFIX in the future 
