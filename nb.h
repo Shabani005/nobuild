@@ -596,7 +596,7 @@ char* nb_hexdump_generic(char* filename, nb_hexinfo *info){
 
   size_t count = 0;
 
-  for (size_t i=0; i < fsize; ++i){
+  for (size_t i=0; i+1 < fsize; ++i){
     p += sprintf(p, "%02X ", buf[i]);
     count++;
   }
@@ -790,10 +790,6 @@ char* nb_xxd(char* filename, nb_xxd_info *info, char* outname){
   char* p2 = otherbuf;  
 
   size_t count = 0; 
- 
-  // char test[2] = {0x31, 0x30}; 
- 
-  // should probably do <= to ignore last thing
 
   for (size_t i=1; i+1 < fsize; ++i){
     p += sprintf(p, "0x%02x, ", buf[i]);
@@ -804,20 +800,13 @@ char* nb_xxd(char* filename, nb_xxd_info *info, char* outname){
   *p = '\0';
   newbuf[count*10] = '\0';
 
-  // p should be null terminated?
-  // 
   p2 += sprintf(p2, "char %s[%zu] = {", outname, count);
   p2 += sprintf(p2, newbuf);
   p2 += sprintf(p2, "};\n");
 
   p2 += sprintf(p2, "int %s_count = %zu;", outname, count);
   
-  // printf("%s\n", newbuf);
-  // printf("%zu\n", count);
-  // printf("count: %zu\n", count);
-  // *p = '\0';
   return otherbuf;
-
   fclose(f);
 }
 
