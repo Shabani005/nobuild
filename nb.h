@@ -778,7 +778,7 @@ char* nb_xxd(char* filename, nb_xxd_info *info, char* outname){
 
   fseek(f, 0, SEEK_SET);  
   fread(buf, 1, sizeof(char)*fsize, f);
-  buf[fsize+1] = '\0';
+  buf[fsize] = '\0';
 
   // TODO: unhardcode values
 
