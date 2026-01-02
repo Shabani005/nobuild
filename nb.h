@@ -334,7 +334,7 @@ void nb_copy_file(char* old_file_name, char* new_file_name){ // old name shouldn
   nb_file old_file; 
   nb_file new_file;
 
-  if (!nb_does_file_exist()){
+  if (!nb_does_file_exist(old_file_name)){
     printf("%s does not exit", old_file_name);
     return;
   }
