@@ -791,7 +791,7 @@ char* nb_xxd(char* filename, nb_xxd_info *info, char* outname){
 
   size_t count = 0; 
 
-  for (size_t i=1; i+1 < fsize; ++i){
+  for (size_t i=0; i+1 < fsize; ++i){
     p += sprintf(p, "0x%02x, ", buf[i]);
     count++;
   }
