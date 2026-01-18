@@ -118,6 +118,7 @@ void nb_free(nb_arr *newarr);
 char* nb_strdup(const char* s); // make this void that uses realloc later.
 char** nb_split_by_delim(char* str, char delim);
 char* nb_append_null(char* buf, size_t len);
+char* nb_temp_sprintf(const char *fmt, ...);
 
 void nb_print(nb_arr *newarr);
 void nb_print_info(nb_arr *newarr);
@@ -150,6 +151,9 @@ void  nb_qsortf_impl(void *base, size_t nmemb); // these    functions      macro
 void  nb_qsorti_impl(void *base, size_t nmemb); //      two          have 
 float nb_time();
 float nb_sec_to_msec(float sec);
+bool nb_is_int(char* v);
+bool nb_is_float(char* v);
+bool nb_is_number(char* v);
 
 // Hash Table Utils
 uint32_t nb_ht_hash(const char* input, size_t size);
@@ -818,6 +822,46 @@ char* nb_append_null(char* buf, size_t len){
   return newbuf;
 }
 
+bool nb_is_int(char* v){
+  size_t len = strlen(v);
+  for (size_t i=0; i<len; ++i){
+    if ((unsigned char)v[i] < '0' || (unsigned char)v[i] > '9') return false;
+  }
+  return true;
+}
+
+bool nb_is_float(char* v){
+  size_t len = strlen(v);
+  size_t dots = 0;
+
+  if (len==0) return false;
+  if (v[0] == '.' || v[len-1] == '.') return false;
+
+  for (size_t i=0; i<len; ++i){
+    if (v[i] == '.') {
+      dots++;
+      if (dots > 1) return false;
+      continue;
+    }
+        if ((unsigned char)v[i] < '0' || (unsigned char)v[i] > '9') return false;
+  }
+  return true;
+}
+
+bool nb_is_number(char* v){
+  if (nb_is_int(v) || nb_is_float(v)) return true;
+  return false;
+}
+
+char* nb_temp_sprintf(const char *fmt, ...){
+  static char s[8192];
+
+  va_list ap;
+  va_start(ap, fmt);
+  vsnprintf(s, sizeof(s), fmt, ap);
+  va_end(ap);
+  return s;
+}
 #endif //NB_IMPLEMENTATION
 
 // TODO: add #ifdef NB_STRIP_PREFIX in the future 
