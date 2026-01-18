@@ -11,6 +11,7 @@
 #include <string.h>
 #include <sys/mman.h>
 #include <stdint.h>
+#include <stdarg.h>
 
 typedef struct {
   int debug;
