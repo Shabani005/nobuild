@@ -105,6 +105,8 @@ static void ensure_default_arena(void) {
 #define nb_qsorti(arr) nb_qsorti_impl((arr), sizeof(arr)/sizeof(arr[0]))
 #define nb_split(string, ...) nb_split_impl(string, (nb_opt) {__VA_ARGS__})
 #define nb_hexdump(filename) nb_hexdump_generic(filename, &nb_default_info_h)
+#define NB_TMP_BUF_COUNT 20
+#define NB_TMP_BUF_SIZE  8192
 
 // "Build" System
 void nb_init(nb_arr *newarr, int initial_capacity); // obsolete
@@ -854,14 +856,18 @@ bool nb_is_number(char* v){
   return false;
 }
 
-char* nb_temp_sprintf(const char *fmt, ...){
-  static char s[8192];
+char* nb_temp_sprintf(const char *fmt, ...) {
+    static char bufs[NB_TMP_BUF_COUNT][NB_TMP_BUF_SIZE];
+    static size_t idx = 0;
 
-  va_list ap;
-  va_start(ap, fmt);
-  vsnprintf(s, sizeof(s), fmt, ap);
-  va_end(ap);
-  return s;
+    char *out = bufs[idx++ % NB_TMP_BUF_COUNT];
+
+    va_list ap;
+    va_start(ap, fmt);
+    vsnprintf(out, NB_TMP_BUF_SIZE, fmt, ap);
+    va_end(ap);
+
+    return out;
 }
 #endif //NB_IMPLEMENTATION
 
