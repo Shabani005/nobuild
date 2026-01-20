@@ -364,7 +364,7 @@ bool nb_did_file_change(char *filename){
   struct stat file_old;
   stat(filename, &file_old);
 
-  if (!nb_does_file_exist){
+  if (!nb_does_file_exist()){
     printf("%s does not exist\n", filename);
     return 0;
   }
